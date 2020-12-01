@@ -11,6 +11,15 @@ type Request struct {
 	processed bool
 }
 
+func RemoveIndex(requests []Request, index int) []Request {
+	return append(requests[:index], requests[index+1:]...)
+}
+
+func RemoveCopy(requests  []Request, i int) []Request {
+	copy(requests [i:], requests [i+1:])
+	return requests [:len(requests)-1]
+}
+
 func createPQ ( requests []Request, priority int, time int, processed bool) []Request {
 	request := Request{
 		priority: priority,
@@ -22,31 +31,39 @@ func createPQ ( requests []Request, priority int, time int, processed bool) []Re
 }
 
 func processedRequests(requests [] Request, q int) []Request {
-	a := true;
-	for a {
+
+
 		for i:=0; i < len(requests); i ++ {
 			if requests[i].time < q {
 				requests[i].processed = true;
-				return requests;
+
+				requests = append(requests, requests[i]);
+				_requests := RemoveCopy(requests, 0)
+				//return requests;
+				fmt.Println("Updated");
+				for i:=0; i < len(_requests); i ++ {
+					fmt.Printf("%+v\n", _requests[i]);
+				}
+				return _requests;
 			} else {
-				a = false;
+
 				fmt.Println("Remove:= ", requests[i])
-				requests[i] = requests[len(requests)-1];
+				requests = append(requests, requests[i]);
+				_requests := RemoveCopy(requests, 0)
 
 				fmt.Println("---------------------");
 
-				for i := 0; i < len(requests); i++ {
-					fmt.Println(requests[i]);
+				for i := 0; i < len(_requests); i++ {
+					fmt.Printf("%+v\n", _requests[i]);
 				}
 
 				fmt.Println("---------------------");
-				requests = append(requests, requests[i]);
-				return requests;
+				//requests = append(requests, requests[i]);
+				//processedRequests(requests, q);
+				return _requests;
 			}
 		}
 		return nil;
-	}
-	return nil
 }
 
 func main()  {
@@ -61,9 +78,9 @@ func main()  {
 		requests = _requests;
 	}
 
-	for i:=0; i < len(requests); i ++ {
-		fmt.Println(requests[i])
-	}
+	//for i:=0; i < len(requests); i ++ {
+	//	fmt.Println(requests[i])
+	//}
 
 	sort.SliceStable(requests, func(i, j int) bool {
 		return requests[i].priority < requests[j].priority
@@ -79,9 +96,13 @@ func main()  {
 
 	fmt.Println("Время для исполения заявки:= ", q)
 
-	_requests := processedRequests(requests, q);
+	for i:=0; i < len(requests); i++ {
+		_requests := processedRequests(requests, q);
+		//fmt.Println("result: ", _requests);
+		requests = _requests;
+	}
 
-	for i := 0; i < len(_requests); i++ {
-		fmt.Println(_requests[i])
+	for i := 0; i < len(requests); i++ {
+		fmt.Println(requests[i])
 	}
 }
